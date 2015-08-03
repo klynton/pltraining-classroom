@@ -14,8 +14,8 @@ class classroom::course::infrastructure {
     ensure => directory,
   }
   file { '/usr/local/bin/run_agents':
-    ensure => present,
-    mode   => '755',
+    ensure => file,
+    mode   => '0755',
     source => 'puppet:///modules/classroom/run_agents.sh',
   }
 
@@ -24,7 +24,7 @@ class classroom::course::infrastructure {
     require    => File['/etc/docker/agent/'],
   }
 
-  if $::ipaddress_docker0 { 
+  if $::ipaddress_docker0 {
   Docker::Run {
     image            => 'agent',
     command          => '/sbin/init 3',
@@ -33,11 +33,11 @@ class classroom::course::infrastructure {
     volumes          => [
       '/var/yum:/var/yum',
       '/sys/fs/cgroup:/sys/fs/cgroup:ro',
-      '/etc/docker/ssl_dir/:/etc/puppetlabs/puppet/ssl'
+      '/etc/docker/ssl_dir/:/etc/puppetlabs/puppet/ssl',
     ],
     extra_parameters => [
       "--add-host \"${::fqdn} master.puppetlabs.vm puppetfactory puppet:${::ipaddress_docker0}\"",
-      "--restart=always"
+      '--restart=always',
     ],
     require          => [
       Docker::Image['agent'],
